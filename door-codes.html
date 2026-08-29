@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B2430">
+<title>Codes</title>
+<style>
+  :root{
+    --bg:#161D27;
+    --surface:#212C3A;
+    --surface-2:#283445;
+    --brass:#C9A227;
+    --brass-soft:#8f7524;
+    --ink:#F0EDE6;
+    --muted:#8B93A1;
+    --danger:#B5533C;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, #1d2735 0%, transparent 45%),
+      var(--bg);
+    color:var(--ink);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height:100vh;
+    padding-bottom:110px;
+  }
+  header{
+    padding:32px 20px 16px;
+    text-align:left;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--brass);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  h1{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:14px;
+    margin-top:6px;
+  }
+  #list{
+    padding:8px 16px 0;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .tag{
+    position:relative;
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:18px 18px 16px 26px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+    border:1px solid rgba(255,255,255,0.04);
+  }
+  .tag::before{
+    content:"";
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--bg);
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.08);
+  }
+  .tag-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .tag-name{
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+    word-break:break-word;
+  }
+  .tag-actions{
+    display:flex;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .icon-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:16px;
+    padding:6px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .icon-btn:active{ color:var(--ink); }
+  .code-row{
+    margin-top:10px;
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .code{
+    font-family: 'SFMono-Regular', 'JetBrains Mono', Consolas, monospace;
+    font-size:30px;
+    letter-spacing:0.12em;
+    font-weight:600;
+    color:var(--brass);
+  }
+  .note{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:4px;
+  }
+  .copied-msg{
+    font-size:12px;
+    color:var(--brass);
+    opacity:0;
+    transition:opacity .2s;
+  }
+  .copied-msg.show{ opacity:1; }
+  #empty{
+    text-align:center;
+    color:var(--muted);
+    padding:60px 30px;
+    font-size:14px;
+    line-height:1.6;
+  }
+  #fab{
+    position:fixed;
+    bottom:26px;
+    right:22px;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:var(--brass);
+    color:#1B2430;
+    border:none;
+    font-size:30px;
+    font-weight:600;
+    box-shadow:0 8px 20px rgba(201,162,39,0.35);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  #fab:active{ background:var(--brass-soft); }
+
+  #overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,14,20,0.6);
+    display:none;
+    align-items:flex-end;
+    z-index:10;
+  }
+  #overlay.show{ display:flex; }
+  #sheet{
+    background:var(--surface-2);
+    width:100%;
+    border-radius:24px 24px 0 0;
+    padding:24px 20px 28px;
+    animation:slideup .18s ease-out;
+  }
+  @keyframes slideup{ from{transform:translateY(20px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+  #sheet h2{
+    margin:0 0 16px;
+    font-size:18px;
+  }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+  }
+  .field input{
+    width:100%;
+    background:var(--bg);
+    border:1px solid rgba(255,255,255,0.08);
+    color:var(--ink);
+    padding:12px 14px;
+    border-radius:12px;
+    font-size:16px;
+  }
+  .field input:focus{
+    outline:none;
+    border-color:var(--brass);
+  }
+  #sheet-actions{
+    display:flex;
+    gap:10px;
+    margin-top:6px;
+  }
+  #sheet-actions button{
+    flex:1;
+    padding:14px;
+    border-radius:12px;
+    border:none;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  #cancel-btn{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  #save-btn{
+    background:var(--brass);
+    color:#1B2430;
+  }
+  #save-btn:active{ background:var(--brass-soft); }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">On the road</p>
+  <h1>Door Codes</h1>
+  <p class="sub">Saved only on this phone. Tap a code to copy it.</p>
+</header>
+
+<div id="list"></div>
+<div id="empty" style="display:none;">No codes yet.<br>Tap the + button to add your first one.</div>
+
+<button id="fab" aria-label="Add code">+</button>
+
+<div id="overlay">
+  <div id="sheet">
+    <h2 id="sheet-title">Add a code</h2>
+    <div class="field">
+      <label for="f-name">Place</label>
+      <input id="f-name" type="text" placeholder="e.g. Front gate, Villa, Wi-Fi">
+    </div>
+    <div class="field">
+      <label for="f-code">Code</label>
+      <input id="f-code" type="text" placeholder="e.g. 4471 or B12*">
+    </div>
+    <div class="field">
+      <label for="f-note">Note (optional)</label>
+      <input id="f-note" type="text" placeholder="e.g. Ring twice, second floor">
+    </div>
+    <div id="sheet-actions">
+      <button id="cancel-btn">Cancel</button>
+      <button id="save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'holiday-door-codes';
+  let codes = [];
+  let editingId = null;
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      codes = raw ? JSON.parse(raw) : [];
+    }catch(e){ codes = []; }
+  }
+  function persist(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
+  }
+
+  function render(){
+    const list = document.getElementById('list');
+    const empty = document.getElementById('empty');
+    list.innerHTML = '';
+    if(codes.length === 0){
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    codes.forEach(c => {
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.innerHTML = `
+        <div class="tag-top">
+          <div class="tag-name">${escapeHtml(c.name)}</div>
+          <div class="tag-actions">
+            <button class="icon-btn" data-action="edit" data-id="${c.id}" aria-label="Edit">✎</button>
+            <button class="icon-btn" data-action="delete" data-id="${c.id}" aria-label="Delete">✕</button>
+          </div>
+        </div>
+        <div class="code-row">
+          <span class="code" data-action="copy" data-id="${c.id}">${escapeHtml(c.code)}</span>
+          <span class="copied-msg" id="copied-${c.id}">Copied</span>
+        </div>
+        ${c.note ? `<div class="note">${escapeHtml(c.note)}</div>` : ''}
+      `;
+      list.appendChild(tag);
+    });
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function openSheet(editId){
+    editingId = editId || null;
+    document.getElementById('sheet-title').textContent = editId ? 'Edit code' : 'Add a code';
+    if(editId){
+      const c = codes.find(x => x.id === editId);
+      document.getElementById('f-name').value = c.name;
+      document.getElementById('f-code').value = c.code;
+      document.getElementById('f-note').value = c.note || '';
+    } else {
+      document.getElementById('f-name').value = '';
+      document.getElementById('f-code').value = '';
+      document.getElementById('f-note').value = '';
+    }
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('f-name').focus();
+  }
+  function closeSheet(){
+    document.getElementById('overlay').classList.remove('show');
+    editingId = null;
+  }
+
+  document.getElementById('fab').addEventListener('click', () => openSheet(null));
+  document.getElementById('cancel-btn').addEventListener('click', closeSheet);
+  document.getElementById('overlay').addEventListener('click', (e) => {
+    if(e.target.id === 'overlay') closeSheet();
+  });
+
+  document.getElementById('save-btn').addEventListener('click', () => {
+    const name = document.getElementById('f-name').value.trim();
+    const code = document.getElementById('f-code').value.trim();
+    const note = document.getElementById('f-note').value.trim();
+    if(!name || !code) return;
+
+    if(editingId){
+      const c = codes.find(x => x.id === editingId);
+      c.name = name; c.code = code; c.note = note;
+    } else {
+      codes.push({ id: Date.now().toString(), name, code, note });
+    }
+    persist();
+    render();
+    closeSheet();
+  });
+
+  document.getElementById('list').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+
+    if(action === 'edit'){
+      openSheet(id);
+    } else if(action === 'delete'){
+      if(confirm('Delete this code?')){
+        codes = codes.filter(c => c.id !== id);
+        persist();
+        render();
+      }
+    } else if(action === 'copy'){
+      const c = codes.find(x => x.id === id);
+      navigator.clipboard?.writeText(c.code).catch(()=>{});
+      const msg = document.getElementById('copied-' + id);
+      if(msg){
+        msg.classList.add('show');
+        setTimeout(() => msg.classList.remove('show'), 1200);
+      }
+    }
+  });
+
+  load();
+  render();
+</script>
+</body>
+</html>
