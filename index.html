@@ -5,8 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1B2430">
-<title>Codes</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#161D27">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Stow</title>
 <style>
   :root{
     --bg:#161D27;
@@ -28,37 +32,42 @@
     color:var(--ink);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height:100vh;
-    padding-bottom:110px;
+    padding-bottom:150px;
+    overscroll-behavior-y: none;
   }
   header{
-    padding:32px 20px 16px;
-    text-align:left;
+    padding:28px 20px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
   }
-  .eyebrow{
-    font-size:12px;
-    letter-spacing:.18em;
-    text-transform:uppercase;
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{
+    width:34px; height:34px;
+    border-radius:9px;
+    background:var(--bg);
+    box-shadow:inset 0 0 0 1.5px rgba(201,162,39,0.4);
+    display:flex; align-items:center; justify-content:center;
     color:var(--brass);
-    font-weight:600;
-    margin:0 0 6px;
+    font-weight:800;
+    font-size:18px;
   }
   h1{
     margin:0;
-    font-size:28px;
+    font-size:20px;
     font-weight:700;
     letter-spacing:-0.01em;
   }
   .sub{
     color:var(--muted);
-    font-size:14px;
-    margin-top:6px;
+    font-size:12.5px;
+    margin:2px 0 0;
   }
-  #list{
-    padding:8px 16px 0;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
+
+  main{ padding:4px 16px 0; }
+  section.panel{ display:none; flex-direction:column; gap:14px; }
+  section.panel.active{ display:flex; }
+
   .tag{
     position:relative;
     background:var(--surface);
@@ -91,81 +100,97 @@
     color:var(--ink);
     word-break:break-word;
   }
-  .tag-actions{
-    display:flex;
-    gap:6px;
-    flex-shrink:0;
+  .tag-when{
+    font-size:12px;
+    color:var(--brass);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-top:2px;
   }
+  .tag-actions{ display:flex; gap:6px; flex-shrink:0; }
   .icon-btn{
-    background:none;
-    border:none;
-    color:var(--muted);
-    font-size:16px;
-    padding:6px;
-    cursor:pointer;
-    line-height:1;
+    background:none; border:none; color:var(--muted);
+    font-size:16px; padding:6px; cursor:pointer; line-height:1;
   }
   .icon-btn:active{ color:var(--ink); }
+
   .code-row{
     margin-top:10px;
-    display:flex;
-    align-items:baseline;
-    gap:14px;
-    flex-wrap:wrap;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
   }
   .code{
     font-family: 'SFMono-Regular', 'JetBrains Mono', Consolas, monospace;
-    font-size:30px;
-    letter-spacing:0.12em;
-    font-weight:600;
-    color:var(--brass);
+    font-size:30px; letter-spacing:0.12em; font-weight:600; color:var(--brass);
   }
-  .note{
-    color:var(--muted);
-    font-size:13px;
-    margin-top:4px;
-  }
-  .copied-msg{
-    font-size:12px;
-    color:var(--brass);
-    opacity:0;
-    transition:opacity .2s;
-  }
+  .note{ color:var(--muted); font-size:13px; margin-top:6px; line-height:1.5; }
+  .copied-msg{ font-size:12px; color:var(--brass); opacity:0; transition:opacity .2s; }
   .copied-msg.show{ opacity:1; }
-  #empty{
-    text-align:center;
-    color:var(--muted);
-    padding:60px 30px;
-    font-size:14px;
-    line-height:1.6;
+
+  #empty-codes, #empty-plans{
+    text-align:center; color:var(--muted); padding:60px 20px; font-size:14px; line-height:1.6;
   }
+
+  .note-body{
+    color:var(--muted);
+    font-size:14px;
+    margin-top:8px;
+    line-height:1.55;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+
   #fab{
     position:fixed;
-    bottom:26px;
+    bottom:98px;
     right:22px;
-    width:60px;
-    height:60px;
+    width:58px; height:58px;
     border-radius:50%;
     background:var(--brass);
     color:#1B2430;
     border:none;
-    font-size:30px;
+    font-size:28px;
     font-weight:600;
     box-shadow:0 8px 20px rgba(201,162,39,0.35);
     cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display:flex; align-items:center; justify-content:center;
   }
   #fab:active{ background:var(--brass-soft); }
 
-  #overlay{
+  #tabbar{
     position:fixed;
-    inset:0;
+    left:0; right:0; bottom:0;
+    background:var(--surface-2);
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex;
+    padding:8px 10px calc(10px + env(safe-area-inset-bottom));
+    gap:4px;
+  }
+  .tab-btn{
+    flex:1;
+    background:none;
+    border:none;
+    color:var(--muted);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding:8px 0 4px;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:.02em;
+    cursor:pointer;
+    border-radius:12px;
+  }
+  .tab-btn svg{ width:22px; height:22px; }
+  .tab-btn.active{ color:var(--brass); }
+  .tab-btn.active svg{ stroke:var(--brass); }
+  .tab-btn svg{ stroke:var(--muted); fill:none; stroke-width:1.8; }
+
+  #overlay{
+    position:fixed; inset:0;
     background:rgba(10,14,20,0.6);
-    display:none;
-    align-items:flex-end;
-    z-index:10;
+    display:none; align-items:flex-end; z-index:10;
   }
   #overlay.show{ display:flex; }
   #sheet{
@@ -174,87 +199,132 @@
     border-radius:24px 24px 0 0;
     padding:24px 20px 28px;
     animation:slideup .18s ease-out;
+    max-height:80vh;
+    overflow-y:auto;
   }
   @keyframes slideup{ from{transform:translateY(20px); opacity:0;} to{transform:translateY(0); opacity:1;} }
-  #sheet h2{
-    margin:0 0 16px;
-    font-size:18px;
-  }
+  #sheet h2{ margin:0 0 16px; font-size:18px; }
   .field{ margin-bottom:14px; }
   .field label{
-    display:block;
-    font-size:12px;
-    color:var(--muted);
-    margin-bottom:6px;
-    text-transform:uppercase;
-    letter-spacing:.08em;
+    display:block; font-size:12px; color:var(--muted); margin-bottom:6px;
+    text-transform:uppercase; letter-spacing:.08em;
   }
   .field input{
-    width:100%;
-    background:var(--bg);
-    border:1px solid rgba(255,255,255,0.08);
-    color:var(--ink);
-    padding:12px 14px;
-    border-radius:12px;
-    font-size:16px;
+    width:100%; background:var(--bg); border:1px solid rgba(255,255,255,0.08);
+    color:var(--ink); padding:12px 14px; border-radius:12px; font-size:16px;
   }
-  .field input:focus{
-    outline:none;
-    border-color:var(--brass);
+  .field input:focus{ outline:none; border-color:var(--brass); }
+  .field input[type="date"]{
+    color-scheme: dark;
   }
-  #sheet-actions{
-    display:flex;
-    gap:10px;
-    margin-top:6px;
+  .field textarea{
+    width:100%; background:var(--bg); border:1px solid rgba(255,255,255,0.08);
+    color:var(--ink); padding:12px 14px; border-radius:12px; font-size:16px;
+    font-family:inherit; min-height:120px; resize:vertical;
   }
+  .field textarea:focus{ outline:none; border-color:var(--brass); }
+  #sheet-actions{ display:flex; gap:10px; margin-top:6px; }
   #sheet-actions button{
-    flex:1;
-    padding:14px;
-    border-radius:12px;
-    border:none;
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
+    flex:1; padding:14px; border-radius:12px; border:none; font-size:15px; font-weight:600; cursor:pointer;
   }
-  #cancel-btn{
-    background:transparent;
-    color:var(--muted);
-    border:1px solid rgba(255,255,255,0.1);
-  }
-  #save-btn{
-    background:var(--brass);
-    color:#1B2430;
-  }
+  #cancel-btn{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.1); }
+  #save-btn{ background:var(--brass); color:#1B2430; }
   #save-btn:active{ background:var(--brass-soft); }
+  #confirm-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,14,20,0.6);
+    display:none; align-items:center; justify-content:center; z-index:20;
+    padding:20px;
+  }
+  #confirm-overlay.show{ display:flex; }
+  #confirm-box{
+    background:var(--surface-2);
+    border-radius:18px;
+    padding:22px 20px;
+    width:100%;
+    max-width:340px;
+    text-align:center;
+  }
+  #confirm-box p{ margin:0 0 18px; font-size:15px; color:var(--ink); }
+  #confirm-actions{ display:flex; gap:10px; }
+  #confirm-actions button{
+    flex:1; padding:13px; border-radius:12px; border:none; font-size:15px; font-weight:600; cursor:pointer;
+  }
+  #confirm-cancel{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.1); }
+  #confirm-delete{ background:var(--danger); color:#fff; }
 </style>
 </head>
 <body>
 
 <header>
-  <p class="eyebrow">On the road</p>
-  <h1>Door Codes</h1>
-  <p class="sub">Saved only on this phone. Tap a code to copy it.</p>
+  <div class="brand">
+    <div class="brand-mark">S</div>
+    <div>
+      <h1>Stow</h1>
+      <p class="sub" id="header-sub">Saved only on this phone</p>
+    </div>
+  </div>
 </header>
 
-<div id="list"></div>
-<div id="empty" style="display:none;">No codes yet.<br>Tap the + button to add your first one.</div>
+<main>
 
-<button id="fab" aria-label="Add code">+</button>
+  <section class="panel active" id="panel-codes">
+    <div id="list-codes"></div>
+    <div id="empty-codes" style="display:none;">No codes yet.<br>Tap + to add your first one.</div>
+  </section>
+
+  <section class="panel" id="panel-plans">
+    <div id="list-plans"></div>
+    <div id="empty-plans" style="display:none;">No plans yet.<br>Tap + to add a booking, table, or activity.</div>
+  </section>
+
+  <section class="panel" id="panel-notes">
+    <div id="list-notes"></div>
+    <div id="empty-notes" style="display:none;">No notes yet.<br>Tap + to jot something down.</div>
+  </section>
+
+</main>
+
+<button id="fab" aria-label="Add">+</button>
+
+<nav id="tabbar">
+  <button class="tab-btn active" data-tab="codes">
+    <svg viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+    Codes
+  </button>
+  <button class="tab-btn" data-tab="plans">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+    Plans
+  </button>
+  <button class="tab-btn" data-tab="notes">
+    <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+    Notes
+  </button>
+</nav>
 
 <div id="overlay">
   <div id="sheet">
     <h2 id="sheet-title">Add a code</h2>
-    <div class="field">
-      <label for="f-name">Place</label>
+
+    <div class="field" id="field-name">
+      <label id="label-name" for="f-name">Place</label>
       <input id="f-name" type="text" placeholder="e.g. Front gate, Villa, Wi-Fi">
     </div>
-    <div class="field">
+    <div class="field" id="field-code">
       <label for="f-code">Code</label>
       <input id="f-code" type="text" placeholder="e.g. 4471 or B12*">
     </div>
-    <div class="field">
+    <div class="field" id="field-when" style="display:none;">
+      <label for="f-when">Date (optional)</label>
+      <input id="f-when" type="date">
+    </div>
+    <div class="field" id="field-note">
       <label for="f-note">Note (optional)</label>
       <input id="f-note" type="text" placeholder="e.g. Ring twice, second floor">
+    </div>
+    <div class="field" id="field-body" style="display:none;">
+      <label for="f-body">Note</label>
+      <textarea id="f-body" placeholder="Anything worth remembering..."></textarea>
     </div>
     <div id="sheet-actions">
       <button id="cancel-btn">Cancel</button>
@@ -263,44 +333,85 @@
   </div>
 </div>
 
+<div id="confirm-overlay">
+  <div id="confirm-box">
+    <p>Delete this?</p>
+    <div id="confirm-actions">
+      <button id="confirm-cancel">Cancel</button>
+      <button id="confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  const STORAGE_KEY = 'holiday-door-codes';
-  let codes = [];
+  const KEYS = { codes: 'stow-codes', plans: 'stow-plans', notes: 'stow-notes-list' };
+  let data = { codes: [], plans: [], notes: [] };
+  let activeTab = 'codes';
   let editingId = null;
+  let pendingDelete = null;
 
-  function load(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      codes = raw ? JSON.parse(raw) : [];
-    }catch(e){ codes = []; }
-  }
-  function persist(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
+  function loadAll(){
+    try{ data.codes = JSON.parse(localStorage.getItem(KEYS.codes) || '[]'); }catch(e){ data.codes = []; }
+    try{ data.plans = JSON.parse(localStorage.getItem(KEYS.plans) || '[]'); }catch(e){ data.plans = []; }
+    try{ data.notes = JSON.parse(localStorage.getItem(KEYS.notes) || '[]'); }catch(e){ data.notes = []; }
   }
 
-  function render(){
-    const list = document.getElementById('list');
-    const empty = document.getElementById('empty');
+  function formatDay(dateStr){
+    if(!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    if(isNaN(d)) return '';
+    const day = d.toLocaleDateString('en-GB', { weekday: 'short' });
+    const rest = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `${day} · ${rest}`;
+  }
+  function persist(tab){
+    localStorage.setItem(KEYS[tab], JSON.stringify(data[tab]));
+  }
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  const SUBS = {
+    codes: 'Saved only on this phone',
+    plans: 'Bookings, tables, activities',
+    notes: 'A scratchpad for anything else'
+  };
+
+  function switchTab(tab){
+    activeTab = tab;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('header-sub').textContent = SUBS[tab];
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // ---- Codes & Plans rendering ----
+  function renderCodes(){
+    const list = document.getElementById('list-codes');
+    const empty = document.getElementById('empty-codes');
     list.innerHTML = '';
-    if(codes.length === 0){
-      empty.style.display = 'block';
-      return;
-    }
+    if(data.codes.length === 0){ empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    codes.forEach(c => {
+    data.codes.forEach(c => {
       const tag = document.createElement('div');
       tag.className = 'tag';
       tag.innerHTML = `
         <div class="tag-top">
           <div class="tag-name">${escapeHtml(c.name)}</div>
           <div class="tag-actions">
-            <button class="icon-btn" data-action="edit" data-id="${c.id}" aria-label="Edit">✎</button>
-            <button class="icon-btn" data-action="delete" data-id="${c.id}" aria-label="Delete">✕</button>
+            <button class="icon-btn" data-action="edit" data-tab="codes" data-id="${c.id}" aria-label="Edit">✎</button>
+            <button class="icon-btn" data-action="delete" data-tab="codes" data-id="${c.id}" aria-label="Delete">✕</button>
           </div>
         </div>
         <div class="code-row">
-          <span class="code" data-action="copy" data-id="${c.id}">${escapeHtml(c.code)}</span>
-          <span class="copied-msg" id="copied-${c.id}">Copied</span>
+          <span class="code" data-action="copy" data-tab="codes" data-id="${c.id}">${escapeHtml(c.code)}</span>
+          <span class="copied-msg" id="copied-codes-${c.id}">Copied</span>
         </div>
         ${c.note ? `<div class="note">${escapeHtml(c.note)}</div>` : ''}
       `;
@@ -308,25 +419,97 @@
     });
   }
 
-  function escapeHtml(str){
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
+  function renderPlans(){
+    const list = document.getElementById('list-plans');
+    const empty = document.getElementById('empty-plans');
+    list.innerHTML = '';
+    if(data.plans.length === 0){ empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    const sorted = [...data.plans].sort((a, b) => {
+      if(!a.when && !b.when) return 0;
+      if(!a.when) return 1;
+      if(!b.when) return -1;
+      return a.when.localeCompare(b.when);
+    });
+    sorted.forEach(p => {
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.innerHTML = `
+        <div class="tag-top">
+          <div>
+            <div class="tag-name">${escapeHtml(p.name)}</div>
+            ${p.when ? `<div class="tag-when">${formatDay(p.when)}</div>` : ''}
+          </div>
+          <div class="tag-actions">
+            <button class="icon-btn" data-action="edit" data-tab="plans" data-id="${p.id}" aria-label="Edit">✎</button>
+            <button class="icon-btn" data-action="delete" data-tab="plans" data-id="${p.id}" aria-label="Delete">✕</button>
+          </div>
+        </div>
+        ${p.note ? `<div class="note">${escapeHtml(p.note)}</div>` : ''}
+      `;
+      list.appendChild(tag);
+    });
   }
 
-  function openSheet(editId){
+  function renderNotes(){
+    const list = document.getElementById('list-notes');
+    const empty = document.getElementById('empty-notes');
+    list.innerHTML = '';
+    if(data.notes.length === 0){ empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    data.notes.forEach(n => {
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.innerHTML = `
+        <div class="tag-top">
+          <div class="tag-name">${escapeHtml(n.name)}</div>
+          <div class="tag-actions">
+            <button class="icon-btn" data-action="edit" data-tab="notes" data-id="${n.id}" aria-label="Edit">✎</button>
+            <button class="icon-btn" data-action="delete" data-tab="notes" data-id="${n.id}" aria-label="Delete">✕</button>
+          </div>
+        </div>
+        ${n.note ? `<div class="note-body">${escapeHtml(n.note)}</div>` : ''}
+      `;
+      list.appendChild(tag);
+    });
+  }
+
+  function renderAll(){ renderCodes(); renderPlans(); renderNotes(); }
+
+  // ---- Add/Edit sheet ----
+  const LABELS = {
+    codes: { title: 'code', name: 'Place', namePh: 'e.g. Front gate, Villa, Wi-Fi' },
+    plans: { title: 'plan', name: 'What', namePh: 'e.g. Dinner at Da Marco' },
+    notes: { title: 'note', name: 'Title', namePh: 'e.g. Packing, Restaurant tip' }
+  };
+
+  function openSheet(tab, editId){
     editingId = editId || null;
-    document.getElementById('sheet-title').textContent = editId ? 'Edit code' : 'Add a code';
+    const L = LABELS[tab];
+    document.getElementById('sheet-title').textContent = (editId ? 'Edit ' : 'Add a ') + L.title;
+    document.getElementById('label-name').textContent = L.name;
+    document.getElementById('f-name').placeholder = L.namePh;
+
+    document.getElementById('field-code').style.display = tab === 'codes' ? 'block' : 'none';
+    document.getElementById('field-when').style.display = tab === 'plans' ? 'block' : 'none';
+    document.getElementById('field-note').style.display = tab === 'notes' ? 'none' : 'block';
+    document.getElementById('field-body').style.display = tab === 'notes' ? 'block' : 'none';
+
     if(editId){
-      const c = codes.find(x => x.id === editId);
-      document.getElementById('f-name').value = c.name;
-      document.getElementById('f-code').value = c.code;
-      document.getElementById('f-note').value = c.note || '';
+      const item = data[tab].find(x => x.id === editId);
+      document.getElementById('f-name').value = item.name;
+      document.getElementById('f-code').value = item.code || '';
+      document.getElementById('f-when').value = item.when || '';
+      document.getElementById('f-note').value = item.note || '';
+      document.getElementById('f-body').value = item.note || '';
     } else {
       document.getElementById('f-name').value = '';
       document.getElementById('f-code').value = '';
+      document.getElementById('f-when').value = '';
       document.getElementById('f-note').value = '';
+      document.getElementById('f-body').value = '';
     }
+    document.getElementById('overlay').dataset.tab = tab;
     document.getElementById('overlay').classList.add('show');
     document.getElementById('f-name').focus();
   }
@@ -335,56 +518,89 @@
     editingId = null;
   }
 
-  document.getElementById('fab').addEventListener('click', () => openSheet(null));
+  document.getElementById('fab').addEventListener('click', () => openSheet(activeTab, null));
   document.getElementById('cancel-btn').addEventListener('click', closeSheet);
   document.getElementById('overlay').addEventListener('click', (e) => {
     if(e.target.id === 'overlay') closeSheet();
   });
 
   document.getElementById('save-btn').addEventListener('click', () => {
+    const tab = document.getElementById('overlay').dataset.tab;
     const name = document.getElementById('f-name').value.trim();
     const code = document.getElementById('f-code').value.trim();
-    const note = document.getElementById('f-note').value.trim();
-    if(!name || !code) return;
+    const when = document.getElementById('f-when').value;
+    const note = tab === 'notes'
+      ? document.getElementById('f-body').value.trim()
+      : document.getElementById('f-note').value.trim();
+    if(!name) return;
+    if(tab === 'codes' && !code) return;
 
     if(editingId){
-      const c = codes.find(x => x.id === editingId);
-      c.name = name; c.code = code; c.note = note;
+      const item = data[tab].find(x => x.id === editingId);
+      item.name = name; item.note = note;
+      if(tab === 'codes') item.code = code;
+      if(tab === 'plans') item.when = when;
     } else {
-      codes.push({ id: Date.now().toString(), name, code, note });
+      const entry = { id: Date.now().toString(), name, note };
+      if(tab === 'codes') entry.code = code;
+      if(tab === 'plans') entry.when = when;
+      data[tab].push(entry);
     }
-    persist();
-    render();
+    persist(tab);
+    renderAll();
     closeSheet();
   });
 
-  document.getElementById('list').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-action]');
-    if(!btn) return;
-    const id = btn.dataset.id;
-    const action = btn.dataset.action;
+  document.querySelectorAll('#list-codes, #list-plans, #list-notes').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if(!btn) return;
+      const id = btn.dataset.id;
+      const tab = btn.dataset.tab;
+      const action = btn.dataset.action;
 
-    if(action === 'edit'){
-      openSheet(id);
-    } else if(action === 'delete'){
-      if(confirm('Delete this code?')){
-        codes = codes.filter(c => c.id !== id);
-        persist();
-        render();
+      if(action === 'edit'){
+        openSheet(tab, id);
+      } else if(action === 'delete'){
+        pendingDelete = { tab, id };
+        document.getElementById('confirm-overlay').classList.add('show');
+      } else if(action === 'copy'){
+        const item = data[tab].find(x => x.id === id);
+        if(!item || item.code === undefined) return;
+        navigator.clipboard?.writeText(item.code).catch(()=>{});
+        const msg = document.getElementById(`copied-${tab}-${id}`);
+        if(msg){
+          msg.classList.add('show');
+          setTimeout(() => msg.classList.remove('show'), 1200);
+        }
       }
-    } else if(action === 'copy'){
-      const c = codes.find(x => x.id === id);
-      navigator.clipboard?.writeText(c.code).catch(()=>{});
-      const msg = document.getElementById('copied-' + id);
-      if(msg){
-        msg.classList.add('show');
-        setTimeout(() => msg.classList.remove('show'), 1200);
-      }
-    }
+    });
   });
 
-  load();
-  render();
+  document.getElementById('confirm-cancel').addEventListener('click', () => {
+    pendingDelete = null;
+    document.getElementById('confirm-overlay').classList.remove('show');
+  });
+  document.getElementById('confirm-delete').addEventListener('click', () => {
+    if(pendingDelete){
+      const { tab, id } = pendingDelete;
+      data[tab] = data[tab].filter(x => x.id !== id);
+      persist(tab);
+      renderAll();
+    }
+    pendingDelete = null;
+    document.getElementById('confirm-overlay').classList.remove('show');
+  });
+
+  // ---- Service worker ----
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+
+  loadAll();
+  renderAll();
 </script>
 </body>
 </html>
